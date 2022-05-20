@@ -1,3 +1,9 @@
+build:
+	@docker-compose build
+
+build:
+	@docker-compose build --no-cache
+
 test:
 	@docker-compose run api pytest -s
 
