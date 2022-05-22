@@ -4,11 +4,12 @@ build:
 build:
 	@docker-compose build --no-cache
 
-test:
-	@docker-compose run api pytest -s
+tests:
+	@echo "--> Testing on Docker."
+	docker-compose run api pytest -s --cov-report term --cov-report html
 
 run:
-	@docker-compose run api
+	@docker-compose up
 
 makemigrations:
 	@docker-compose run api batman/manage.py makemigrations
