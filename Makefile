@@ -1,25 +1,24 @@
 build:
-	@docker-compose build
+	@sudo docker compose build
 
-build:
-	@docker-compose build --no-cache
-
-tests:
-	@echo "--> Testing on Docker."
-	docker-compose run api pytest -s --cov-report term --cov-report html
+build-no-cache:
+	@sudo docker compose build --no-cache
 
 run:
-	@docker-compose up
+	@sudo docker compose up
 
-makemigrations:
-	@docker-compose run api batman/manage.py makemigrations
+tests:
+	@sudo docker compose run --rm batmanapi sh -c "python manage.py test --verbosity 2 --force-color"
 
 migrate:
-	@docker-compose run api batman/manage.py migrate
+	@sudo docker compose run --rm batmanapi sh -c "python manage.py migrate"
+
+create-migrate:
+	@sudo docker compose run --rm batmanapi sh -c "python manage.py makemigrations"
+
+create-superuser:
+	@sudo docker compose run --rm batmanapi sh -c "python manage.py createsuperuser"
 
 install-requirements:
 	@pip install -r requirements.txt
-
-compile-requirements:
-	@rm -rf requirements.txt
-	@pip-compile requirements.in
+	@pip install -r requirements-dev.txt

@@ -1,28 +1,32 @@
-FROM python:3.8
+FROM python:3.9-alpine3.13
 
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
+LABEL maintainer="batman-api"
 
-RUN apt-get update \
-    && apt-get upgrade -y \
-    && apt-get install -y \
-    build-essential \
-    libssl-dev \
-    libffi-dev \
-    python3-dev \
-    build-essential \
-    libjpeg-dev \
-    zlib1g-dev \
-    gcc \
-    libc-dev \
-    bash \
-    git \
-    && pip3 install --upgrade pip
+ENV PYTHONUNBUFFERED 1
 
-WORKDIR /code/batman
+COPY ./requirements.txt /tmp/requirements.txt
+COPY ./requirements-dev.txt /tmp/requirements-dev.txt
+COPY ./batman /batman
+WORKDIR /batman
+EXPOSE 8000
 
-COPY requirements.txt .
+ARG DEV=false
+RUN python -m venv /py && \
+    /py/bin/pip install --upgrade pip && \
+    apk add --update --no-cache postgresql-client && \
+    apk add --update --no-cache --virtual .tmp-build-deps \
+        build-base postgresql-dev musl-dev && \
+    /py/bin/pip install -r /tmp/requirements.txt && \
+    if [ $DEV = "true" ]; \
+        then /py/bin/pip install -r /tmp/requirements-dev.txt ; \
+    fi && \
+    rm -rf /tmp && \
+    apk del .tmp-build-deps && \
+    adduser \
+        --disabled-password \
+        --no-create-home \
+        django-user
 
-RUN pip install -r requirements.txt
+ENV PATH="/py/bin:$PATH"
 
-COPY . .
+USER django-user
