@@ -1,4 +1,5 @@
 [run]
+parallel = true
 omit =
     *apps.py,
     *migrations/*.py,
